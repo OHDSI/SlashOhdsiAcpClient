@@ -2,7 +2,7 @@ Package: slashOhdsiAcpClient
 Type: Package
 Title: ACP Client for slash-ohdsi Workflow Integrations
 Version: 0.1.0
-Authors@R: person("Your","Name", email="you@example.org", role=c("aut","cre"))
+Authors@R: person("Richard","Boyce", email="rdb20@pitt.edu", role=c("aut","cre"))
 Description: Thin R client for the OHDSI Study Agent ACP bridge. Provides explicit client objects, health checks, and typed wrappers around ACP flows and actions.
 License: MIT + file LICENSE
 Encoding: UTF-8
