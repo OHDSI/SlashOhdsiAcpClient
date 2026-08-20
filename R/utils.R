@@ -1,5 +1,9 @@
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
+# The ACP protocol versions this client can communicate with. Keep this
+# executable compatibility contract separate from DESCRIPTION metadata.
+.acp_supported_api_versions <- 1L
+
 .normalize_acp_body <- function(body) {
   if (!is.list(body)) return(body)
   if (!is.null(body$protocolRef)) body$protocolRef <- as.character(body$protocolRef)

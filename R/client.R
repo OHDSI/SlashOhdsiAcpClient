@@ -58,11 +58,11 @@ acp_check_compatibility <- function(client, health = NULL) {
       call. = FALSE
     )
   }
-  if (!identical(api_version, .acp_supported_api_version)) {
+  if (!api_version %in% .acp_supported_api_versions) {
     stop(
       sprintf(
-        "Incompatible ACP API version: client requires %s but server reports %s (service version %s).",
-        .acp_supported_api_version,
+        "Incompatible ACP API version: client supports %s but server reports %s (service version %s).",
+        paste(.acp_supported_api_versions, collapse = ", "),
         api_version,
         as.character(health$service_version %||% "unknown")
       ),
