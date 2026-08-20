@@ -63,7 +63,6 @@ recommendations <- acp_suggest_phenotypes(
   max_results = 3,
   candidate_limit = 10
 )
-
 str(recommendations, max.level = 2)
 ```
 
@@ -93,10 +92,9 @@ definitions.
 ```r
 review <- acp_review_phenotypes(
   client = client,
-  protocol_path = "protocol.md",
-  cohort_paths = c("cohorts/type_2_diabetes.json")
+  protocol_path = "<path to repo>/extras/protocol.md",
+  cohort_paths = c("<path to repo>/extras/1197_Acute_gastrointestinal_bleeding.json")
 )
-
 str(review, max.level = 2)
 ```
 
@@ -121,6 +119,23 @@ devtools::install_github("ohdsi/slashOhdsiAcpClient")
 library(slashOhdsiAcpClient)
 ```
 
+(Advanced) If you are manually updating to a newer version rather than the recommend standard  renv approach: 
+```
+package_name <- "slashOhdsiAcpClient"
+library_loc <- ""  # fill in the location
+if (paste0("package:", package_name) %in% search()) {
+  detach(paste0("package:", package_name), unload = TRUE, character.only = TRUE)
+}
+
+if (package_name %in% loadedNamespaces()) {
+  unloadNamespace(package_name)
+}
+
+if (dir.exists(file.path(library_loc, package_name))) {
+  remove.packages(package_name, lib = library_loc)
+}
+```
+
 See example usage above. 
 
 ## User Documentation
@@ -129,10 +144,6 @@ See example usage above.
 
 Read the [HADES contribution guide](https://ohdsi.github.io/Hades/contribute.html) to
 learn how to contribute to this package.
-
-## License
-
-This project is licensed under the MIT license. See `LICENSE`.
 
 ## Development
 

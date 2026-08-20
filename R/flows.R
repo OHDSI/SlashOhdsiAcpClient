@@ -86,11 +86,7 @@ acp_suggest_cohort_method_specs <- function(client,
   acp_call_flow(client, "cohort_methods_specifications_recommendation", body)
 }
 
-#' Call workflow context dialogue flow
-#' @param client ACP client object
-#' @param stage_context workflow-stage context object
-#' @param message latest user message
-#' @return parsed ACP response
+# Flatten the structured dialogue context to the ACP flow payload.
 .flatten_workflow_context_dialogue_payload <- function(stage_context, message) {
   if (!is.list(stage_context)) stop("stage_context must be a list.")
   if (is.null(message) || !nzchar(trimws(as.character(message)))) {
@@ -121,6 +117,11 @@ acp_suggest_cohort_method_specs <- function(client,
   )
 }
 
+#' Call workflow context dialogue flow
+#' @param client ACP client object
+#' @param stage_context workflow-stage context object
+#' @param message latest user message
+#' @return parsed ACP response
 #' @export
 acp_workflow_context_dialogue <- function(client, stage_context, message) {
   body <- .flatten_workflow_context_dialogue_payload(stage_context = stage_context, message = message)

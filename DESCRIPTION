@@ -9,9 +9,10 @@ Maintainer: Richard Boyce <rdb20@pitt.edu>
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.4.0)
-Suggests: testthat (>= 3.0.0)
+Suggests: testthat (>= 3.0.0), knitr, rmarkdown
+VignetteBuilder: knitr
 Imports: httr, jsonlite, utils, tools
 Config/testthat/edition: 3
 Config/study-agent-acp-api-version: 1
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3

@@ -1,0 +1,124 @@
+---
+title: "Getting started with slashOhdsiAcpClient"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with slashOhdsiAcpClient}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`slashOhdsiAcpClient` is a low-level R client for a running OHDSI StudyAgent
+ACP bridge. Prefer its explicit-client API: construct a client once, then pass
+it to the flow or action wrapper you need.
+
+## Configure and connect
+
+Use environment variables for deployment-specific settings. Keep tokens outside
+R source files.
+
+```{r connect, eval = FALSE}
+library(slashOhdsiAcpClient)
+
+acp_url <- Sys.getenv("ACP_URL", "http://127.0.0.1:8765")
+acp_token <- Sys.getenv("ACP_TOKEN", unset = "")
+Sys.setenv(ACP_TIMEOUT = "1800")
+
+client <- acp_client(
+  url = acp_url,
+  token = if (nzchar(acp_token)) acp_token else NULL,
+  check = TRUE
+)
+
+acp_server_info(client)
+```
+
+By default, `acp_client(check = TRUE)` calls `/health` and verifies that the
+bridge reports a compatible ACP API version. `ACP_TIMEOUT` is measured in
+seconds and defaults to 180.
+
+## Request a flow
+
+Call the typed wrapper rather than constructing endpoint paths manually. For
+example, request phenotype recommendations with a clear study intent:
+
+```{r phenotype-recommendation, eval = FALSE}
+recommendations <- acp_suggest_phenotypes(
+  client = client,
+  study_intent = paste(
+    "Estimate the comparative effectiveness of first-line treatments for",
+    "adults with type 2 diabetes, using time to hospitalization as an outcome."
+  ),
+  top_k = 20,
+  max_results = 3,
+  candidate_limit = 10
+)
+
+str(recommendations, max.level = 2)
+```
+
+Responses are parsed R lists. Their contents are determined by the ACP service,
+so inspect them before assuming optional fields exist.
+
+## Local artifact flows
+
+Some flows accept paths to local protocol, cohort, or concept-set artifacts.
+The client validates and reads those paths locally, then sends the resulting
+content to ACP. For example:
+
+```{r local-artifacts, eval = FALSE}
+review <- acp_review_phenotypes(
+  client = client,
+  protocol_path = "protocol.md",
+  cohort_paths = c("cohorts/type_2_diabetes.json")
+)
+```
+
+Use paths only for files the current R process can read. The ACP bridge receives
+the file contents; it does not need to share the client's file system.
+
+## Default-client compatibility helpers
+
+`acp_connect()` stores a checked default client for compatibility-oriented,
+interactive helpers. New reusable code should normally keep passing an explicit
+`client`.
+
+```{r default-client, eval = FALSE}
+acp_connect(url = acp_url, token = if (nzchar(acp_token)) acp_token else NULL)
+
+suggestions <- suggestPhenotypes(
+  studyIntent = "Identify suitable cohorts for a new-user study of statins.",
+  interactive = FALSE
+)
+```
+
+When no default client has been connected, certain compatibility helpers return
+a local stub result whose `source` is `"stub_no_acp"`; that is not an ACP
+response.
+
+## Troubleshooting
+
+| Symptom | Meaning and action |
+|---|---|
+| `ACP bridge not reachable` | The client could not obtain a successful response from `/health`. Start the bridge and verify `ACP_URL`, network access, and any bridge authentication requirement. |
+| Incompatible ACP API version | Upgrade or align the R package and StudyAgent ACP bridge to a compatible API version. |
+| `stub_no_acp` response | A compatibility helper was called without a default connection. Call `acp_connect()`, or use an explicit client with a typed wrapper. |
+| Missing local JSON or protocol file | Correct the supplied path and ensure the R process can read it. |
+| `ACP error` containing an LLM or embedding HTTP 401 | The request reached ACP, but ACP could not authenticate to its configured LLM or embedding provider. This is different from an ACP bearer-token error. Ask the ACP deployment administrator to configure or renew the provider credentials in the ACP environment. |
+
+For example, a phenotype request may fail with an error resembling:
+
+```text
+ACP error: {"status":"error","error":"phenotype_search_failed",
+"details":{"details":"Embedding request failed: HTTP Error 401: Unauthorized",
+"_meta":{"tool":"phenotype_search"}}}
+```
+
+The `Embedding request failed` and `phenotype_search` details identify an
+ACP-side provider authorization problem. Changing `ACP_TOKEN` in the R client
+will not fix it unless the bridge itself also rejected that token. When seeking
+support, provide the flow name and sanitized error payload, but never include
+tokens or provider secrets.
