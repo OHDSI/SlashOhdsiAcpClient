@@ -292,3 +292,46 @@ acp_phenotype_validation_review <- function(client,
   body$keeper_row <- .acp_minimize_keeper_row(keeper_row)
   acp_call_flow(client, "phenotype_validation_review", body)
 }
+
+#' Start or continue the review-gated phenotype make-computable flow
+#' @param client ACP client object
+#' @param narrative_statement user-supplied clinical cohort narrative
+#' @param confirmed_scope whether the supplied scope has been explicitly confirmed
+#' @param scope structured scope, or NULL while requesting clarification
+#' @param concept_review_mode one of `required`, `propose`, or `provided_only`
+#' @param concept_sets explicitly reviewed concept-set policies for emission
+#' @param concept_build_mode optional concept-build mode
+#' @param review_delivery requested review delivery mode
+#' @param candidate_limit maximum vocabulary candidates per lane (1 through 100)
+#' @return parsed ACP response
+#' @export
+acp_phenotype_make_computable <- function(client,
+                                          narrative_statement,
+                                          confirmed_scope = FALSE,
+                                          scope = NULL,
+                                          concept_review_mode = "required",
+                                          concept_sets = list(),
+                                          concept_build_mode = "search_only",
+                                          review_delivery = "auto",
+                                          candidate_limit = 20) {
+  narrative_statement <- trimws(as.character(narrative_statement %||% ""))
+  if (!nzchar(narrative_statement)) stop("Provide a non-empty narrative_statement.")
+  if (!concept_review_mode %in% c("required", "propose", "provided_only")) {
+    stop("concept_review_mode must be required, propose, or provided_only.")
+  }
+  candidate_limit <- suppressWarnings(as.integer(candidate_limit))
+  if (is.na(candidate_limit) || candidate_limit < 1L || candidate_limit > 100L) {
+    stop("candidate_limit must be an integer from 1 through 100.")
+  }
+  body <- list(
+    narrative_statement = narrative_statement,
+    confirmed_scope = isTRUE(confirmed_scope),
+    concept_review_mode = concept_review_mode,
+    concept_build_mode = concept_build_mode,
+    review_delivery = review_delivery,
+    candidate_limit = candidate_limit,
+    concept_sets = concept_sets %||% list()
+  )
+  if (!is.null(scope)) body$scope <- scope
+  acp_call_flow(client, "phenotype_make_computable", body)
+}

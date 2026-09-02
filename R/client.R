@@ -121,6 +121,39 @@ acp_call_flow <- function(client, flow_name, body = list()) {
   .acp_post_json(client, sprintf("/flows/%s", flow_name), body)
 }
 
+#' Retrieve an ACP JSON resource
+#' @param client ACP client object
+#' @param path absolute ACP path beginning with `/`
+#' @return parsed ACP response
+#' @export
+acp_get_json <- function(client, path) {
+  client <- .as_acp_client(client)
+  path <- trimws(as.character(path %||% ""))
+  if (!startsWith(path, "/")) stop("path must begin with '/'.", call. = FALSE)
+  resp <- httr::GET(paste0(client$url, path), httr::add_headers(.headers = .acp_headers(client)), httr::timeout(.acp_timeout_seconds()))
+  if (httr::status_code(resp) >= 300) stop("ACP error: ", httr::content(resp, as = "text", encoding = "UTF-8"), call. = FALSE)
+  jsonlite::fromJSON(httr::content(resp, as = "text", encoding = "UTF-8"), simplifyVector = FALSE)
+}
+
+#' Download an ACP resource to a local file
+#' @param client ACP client object
+#' @param path absolute ACP path beginning with `/`
+#' @param destination local destination path
+#' @return normalized destination path, invisibly
+#' @export
+acp_download <- function(client, path, destination) {
+  client <- .as_acp_client(client)
+  path <- trimws(as.character(path %||% ""))
+  if (!startsWith(path, "/")) stop("path must begin with '/'.", call. = FALSE)
+  destination <- normalizePath(as.character(destination), winslash = "/", mustWork = FALSE)
+  parent <- dirname(destination)
+  if (!dir.exists(parent)) dir.create(parent, recursive = TRUE, showWarnings = FALSE)
+  resp <- httr::GET(paste0(client$url, path), httr::add_headers(.headers = .acp_headers(client)), httr::timeout(.acp_timeout_seconds()))
+  if (httr::status_code(resp) >= 300) stop("ACP error: ", httr::content(resp, as = "text", encoding = "UTF-8"), call. = FALSE)
+  writeBin(httr::content(resp, as = "raw"), destination)
+  invisible(destination)
+}
+
 #' Call an ACP action endpoint
 #' @param client ACP client object
 #' @param action_name action name without the `/actions/` prefix

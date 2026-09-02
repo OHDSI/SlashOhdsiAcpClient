@@ -21,3 +21,10 @@ test_that("incompatible ACP API version reports both requirements", {
     "client supports 1 but server reports 2 \\(service version 9.9.9\\)"
   )
 })
+
+test_that("phenotype make-computable validates its client-side request", {
+  client <- acp_client(check = FALSE)
+  expect_error(acp_phenotype_make_computable(client, ""), "narrative_statement")
+  expect_error(acp_phenotype_make_computable(client, "Cirrhosis", candidate_limit = 101), "1 through 100")
+  expect_error(acp_phenotype_make_computable(client, "Cirrhosis", concept_review_mode = "automatic"), "concept_review_mode")
+})
