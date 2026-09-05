@@ -1,5 +1,9 @@
 # slashOhdsiAcpClient
 
+## Phenotype-make-computable review limits
+
+`acp_phenotype_make_computable()` accepts `candidate_limit` from 1 through 500 for deterministic `required` review sessions. Proposal mode is intentionally limited to 100 candidates by ACP. Large responses should use a review session and durable CSV/manifest download rather than terminal rendering.
+
 ## Introduction
 
 This package is the low-level ACP client for the [OHDSI Study
