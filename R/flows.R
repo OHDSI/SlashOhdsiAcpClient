@@ -48,7 +48,7 @@ acp_phenotype_conversion_prepare <- function(client,
     phenotype_id = phenotype_id,
     recommendation_context = recommendation_context,
     check_vocabulary_database = isTRUE(check_vocabulary_database),
-    expected_domains = expected_domains
+    expected_domains = as.list(expected_domains)
   ))
 }
 
