@@ -28,3 +28,11 @@ test_that("phenotype make-computable validates its client-side request", {
   expect_error(acp_phenotype_make_computable(client, "Cirrhosis", candidate_limit = 101), "1 through 100")
   expect_error(acp_phenotype_make_computable(client, "Cirrhosis", concept_review_mode = "automatic"), "concept_review_mode")
 })
+
+
+test_that("phenotype conversion preparation validates its client-side request", {
+  client <- acp_client(check = FALSE)
+  expect_error(acp_phenotype_conversion_prepare(client, ""), "phenotype_id")
+  expect_error(acp_phenotype_conversion_prepare(client, "cipher:1", recommendation_context = "outcome"), "recommendation_context")
+  expect_error(acp_phenotype_conversion_prepare(client, "cipher:1", check_vocabulary_database = NA), "check_vocabulary_database")
+})

@@ -23,6 +23,35 @@ acp_suggest_phenotypes <- function(client,
   acp_call_flow(client, "phenotype_recommendation", body)
 }
 
+
+#' Prepare a selected phenotype for review-gated conversion or composition
+#' @param client ACP client object
+#' @param phenotype_id selected stable phenotype identifier
+#' @param recommendation_context optional audit context such as role and workflow type
+#' @param check_vocabulary_database whether ACP should check deployed OMOP vocabularies
+#' @return parsed ACP preparation package
+#' @export
+acp_phenotype_conversion_prepare <- function(client,
+                                             phenotype_id,
+                                             expected_domains = character(0),
+                                             recommendation_context = list(),
+                                             check_vocabulary_database = TRUE) {
+  phenotype_id <- trimws(as.character(phenotype_id %||% ""))
+  if (!nzchar(phenotype_id)) stop("Provide a non-empty phenotype_id.")
+  if (!is.list(recommendation_context)) stop("recommendation_context must be a list.")
+  if (!is.logical(check_vocabulary_database) || length(check_vocabulary_database) != 1L || is.na(check_vocabulary_database)) {
+    stop("check_vocabulary_database must be TRUE or FALSE.")
+  }
+  expected_domains <- unique(trimws(as.character(expected_domains %||% character(0))))
+  expected_domains <- expected_domains[nzchar(expected_domains)]
+  acp_call_flow(client, "phenotype_conversion_prepare", list(
+    phenotype_id = phenotype_id,
+    recommendation_context = recommendation_context,
+    check_vocabulary_database = isTRUE(check_vocabulary_database),
+    expected_domains = as.list(expected_domains)
+  ))
+}
+
 #' Call phenotype recommendation advice flow
 #' @param client ACP client object
 #' @param study_intent non-empty study intent string
