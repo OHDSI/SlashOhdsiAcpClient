@@ -17,6 +17,15 @@ public API thin, explicit, and transport-focused.
 - Do not add secrets to source, tests, README examples, or logs. Read bearer
   tokens from the caller or environment.
 
+## Review-Gated Flow Conventions
+
+The client exposes ACP transport; it must not weaken workflow review gates implemented by callers or ACP:
+
+- Serialize and pass structured scope and concept-set payloads exactly. Do not manufacture concept IDs, policies, or approval state in client helpers.
+- `acp_phenotype_make_computable()` uses bounded candidate retrieval. Required review sessions support `candidate_limit` through 500; that bound does not mean a lexical candidate set is complete. Preserve review IDs, CSV/manifest URLs, and approval artifacts for later resume.
+- Do not treat a successful technical-validation response as clinical validation. Callers must retain the approved policy and generated artifacts separately.
+- Keeper profile and validation helpers handle sanitized, de-identified review material only. Never add logging that exposes raw row-level data or credentials.
+
 ## Local R environment
 
 The project may contain linked `.Rprofile` and `renv/` entries. The linked
