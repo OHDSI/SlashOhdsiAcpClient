@@ -8,7 +8,7 @@ Author: Richard Boyce [aut, cre]
 Maintainer: Richard Boyce <rdb20@pitt.edu>
 License: MIT + file LICENSE
 Encoding: UTF-8
-Depends: R (>= 4.4.0)
+Depends: R (>= 4.1.0)
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown
 VignetteBuilder: knitr
 Imports: httr, jsonlite, utils, tools
