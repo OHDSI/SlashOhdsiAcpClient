@@ -331,7 +331,7 @@ acp_phenotype_validation_review <- function(client,
 #' @param concept_sets explicitly reviewed concept-set policies for emission
 #' @param concept_build_mode optional concept-build mode
 #' @param review_delivery requested review delivery mode
-#' @param candidate_limit maximum vocabulary candidates per lane (1 through 100)
+#' @param candidate_limit maximum vocabulary candidates per lane (1 through 500)
 #' @return parsed ACP response
 #' @export
 acp_phenotype_make_computable <- function(client,
@@ -349,8 +349,8 @@ acp_phenotype_make_computable <- function(client,
     stop("concept_review_mode must be required, propose, or provided_only.")
   }
   candidate_limit <- suppressWarnings(as.integer(candidate_limit))
-  if (is.na(candidate_limit) || candidate_limit < 1L || candidate_limit > 100L) {
-    stop("candidate_limit must be an integer from 1 through 100.")
+  if (is.na(candidate_limit) || candidate_limit < 1L || candidate_limit > 500L) {
+    stop("candidate_limit must be an integer from 1 through 500.")
   }
   body <- list(
     narrative_statement = narrative_statement,
