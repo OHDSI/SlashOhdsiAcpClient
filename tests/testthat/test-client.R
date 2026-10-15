@@ -36,3 +36,27 @@ test_that("phenotype conversion preparation validates its client-side request", 
   expect_error(acp_phenotype_conversion_prepare(client, "cipher:1", recommendation_context = "outcome"), "recommendation_context")
   expect_error(acp_phenotype_conversion_prepare(client, "cipher:1", check_vocabulary_database = NA), "check_vocabulary_database")
 })
+
+
+test_that("workflow dialogue payload carries bounded context-contract categories", {
+  payload <- slashOhdsiAcpClient:::.flatten_workflow_context_dialogue_payload(
+    stage_context = list(
+      contract_version = 1L,
+      workflow_type = "strategus_incidence",
+      current_step = "target_selection",
+      step_label = "Target cohort",
+      user_goal = "Study atomoxetine",
+      entities = list(active_role = "target", role_statement = "New users"),
+      available_artifacts = list(review_path = "review.csv"),
+      dialogue = list(prior_questions = list("Why?"), prior_answers = list("Because.")),
+      constraints = list(interactive = TRUE)
+    ),
+    message = "What should I do next?"
+  )
+
+  expect_equal(payload$current_context$context_contract_version, "1")
+  expect_equal(payload$current_context$workflow$current_step, "target_selection")
+  expect_equal(payload$current_context$artifacts$review_path, "review.csv")
+  expect_equal(payload$current_context$dialogue_summary$prior_questions[[1]], "Why?")
+  expect_equal(payload$current_context$step_label, "Target cohort")
+})

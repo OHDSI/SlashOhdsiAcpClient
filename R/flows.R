@@ -134,6 +134,20 @@ acp_suggest_cohort_method_specs <- function(client,
   current_context$prior_answers <- current_context$prior_answers %||% dialogue$prior_answers %||% list()
   current_context$constraints <- current_context$constraints %||% stage_context$constraints %||% list()
 
+  # ACP context-contract v1 categories. Keep the established flat fields above
+  # during migration so existing shells and constrained deployments remain compatible.
+  current_context$context_contract_version <- current_context$context_contract_version %||% "1"
+  current_context$workflow <- current_context$workflow %||% list(
+    workflow_type = stage_context$workflow_type %||% "",
+    current_step = stage_context$current_step %||% "",
+    step_label = stage_context$step_label %||% ""
+  )
+  current_context$artifacts <- current_context$artifacts %||% current_context$available_artifacts
+  current_context$dialogue_summary <- current_context$dialogue_summary %||% list(
+    prior_questions = current_context$prior_questions,
+    prior_answers = current_context$prior_answers
+  )
+
   current_role <- current_context$active_role %||% (stage_context$entities %||% list())$active_role %||% ""
 
   list(
@@ -332,6 +346,7 @@ acp_phenotype_validation_review <- function(client,
 #' @param concept_build_mode optional concept-build mode
 #' @param review_delivery requested review delivery mode
 #' @param candidate_limit maximum vocabulary candidates per lane (1 through 500)
+#' @param scope_draft request an advisory, unconfirmed scope draft
 #' @return parsed ACP response
 #' @export
 acp_phenotype_make_computable <- function(client,
@@ -342,7 +357,8 @@ acp_phenotype_make_computable <- function(client,
                                           concept_sets = list(),
                                           concept_build_mode = "search_only",
                                           review_delivery = "auto",
-                                          candidate_limit = 20) {
+                                          candidate_limit = 20,
+                                          scope_draft = FALSE) {
   narrative_statement <- trimws(as.character(narrative_statement %||% ""))
   if (!nzchar(narrative_statement)) stop("Provide a non-empty narrative_statement.")
   if (!concept_review_mode %in% c("required", "propose", "provided_only")) {
@@ -359,7 +375,8 @@ acp_phenotype_make_computable <- function(client,
     concept_build_mode = concept_build_mode,
     review_delivery = review_delivery,
     candidate_limit = candidate_limit,
-    concept_sets = concept_sets %||% list()
+    concept_sets = concept_sets %||% list(),
+    scope_draft = isTRUE(scope_draft)
   )
   if (!is.null(scope)) body$scope <- scope
   acp_call_flow(client, "phenotype_make_computable", body)
