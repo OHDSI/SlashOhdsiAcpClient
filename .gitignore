@@ -1,0 +1,4 @@
+*.Rbuildignore
+*.Rprofile
+*renv
+*slashOhdsiAcpClient_*.tar.gz
