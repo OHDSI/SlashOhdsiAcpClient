@@ -37,6 +37,25 @@ test_that("phenotype conversion preparation validates its client-side request", 
   expect_error(acp_phenotype_conversion_prepare(client, "cipher:1", check_vocabulary_database = NA), "check_vocabulary_database")
 })
 
+test_that("phenotype conversion preparation forwards unique expected domains", {
+  captured <- NULL
+  local_mocked_bindings(
+    acp_call_flow = function(client, flow_name, body) {
+      captured <<- list(flow_name = flow_name, body = body)
+      list(status = "ok")
+    },
+    .package = "slashOhdsiAcpClient"
+  )
+
+  acp_phenotype_conversion_prepare(
+    acp_client(check = FALSE), "cipher:1",
+    expected_domains = c(" Condition ", "Drug", "Condition", "")
+  )
+
+  expect_identical(captured$flow_name, "phenotype_conversion_prepare")
+  expect_identical(captured$body$expected_domains, list("Condition", "Drug"))
+})
+
 
 test_that("workflow dialogue payload carries bounded context-contract categories", {
   payload <- slashOhdsiAcpClient:::.flatten_workflow_context_dialogue_payload(
